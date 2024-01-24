@@ -10,7 +10,14 @@ pipeline {
                 }
             }
         }
-
+        stage('Install PHPUnit') {
+            steps {
+                script {
+                    // Install PHPUnit globally
+                    sh 'composer global require phpunit/phpunit'
+                }
+            }
+        }
         stage('Build and Run Docker') {
             steps {
                 script {
