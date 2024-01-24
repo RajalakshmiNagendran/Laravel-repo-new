@@ -4,7 +4,6 @@ pipeline {
         stage("Verify Tooling") {
             steps {
                 script {
-                    sh 'chmod -R 755 "${WORKSPACE}"'
                     echo 'Docker Info:'
                     sh 'docker info'
 
@@ -43,6 +42,7 @@ pipeline {
             steps {
                 script {
                     echo 'Deploying containers...'
+                    sh 'chmod -R 755 "${WORKSPACE}"'
                     sh 'docker-compose up -d --build'
                 }
             }
