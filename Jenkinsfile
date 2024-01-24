@@ -4,6 +4,7 @@ pipeline {
         stage("Verify Tooling") {
             steps {
                 script {
+                    cleanWs deleteDirs: true
                     echo 'Docker Info:'
                     sh 'docker info'
 
