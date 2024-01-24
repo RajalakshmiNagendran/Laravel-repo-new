@@ -1,6 +1,3 @@
-// Define Docker user and group IDs
-def DOCKER_USER_ID = "${ENV['UID']}"
-def DOCKER_GROUP_ID = "${ENV['GID']}"
 pipeline {
     agent any
     stages {
