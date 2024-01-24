@@ -1,12 +1,4 @@
 services:
-  composer:
-    image: 'composer:latest'
-    user: '${UID}:${GID}'
-    volumes:
-      - '.:/var/www/html'
-    working_dir: /var/www/html
-    command: install
-
   laravel.test:
     build:
       context: ./vendor/laravel/sail/runtimes/8.3
