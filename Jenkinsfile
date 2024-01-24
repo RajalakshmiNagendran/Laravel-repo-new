@@ -36,8 +36,8 @@ pipeline {
                 }
             }
         }
-
-        stage('Build and Test') {
+        
+        stage('Deploy') {
             steps {
                 script {
                     echo 'Deploying containers...'
