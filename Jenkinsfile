@@ -3,7 +3,6 @@ pipeline {
 
     environment {
         COMPOSER_HOME = "${WORKSPACE}/.composer"
-        PATH = "$PATH:${COMPOSER_HOME}/vendor/bin"
     }
 
     stages {
@@ -11,7 +10,7 @@ pipeline {
             steps {
                 script {
                     // Run Composer install
-                    sh 'composer install'
+                    sh "composer install"
                 }
             }
         }
@@ -36,11 +35,12 @@ pipeline {
         stage('Test') {
             steps {
                 script {
-                    // Print the current PATH for debugging
-                    sh 'echo $PATH'
-                    
+                    // Set up environment variables for PHPUnit
+                    def composerBin = "${COMPOSER_HOME}/vendor/bin"
+                    env.PATH = "${composerBin}:${env.PATH}"
+
                     // Run PHPUnit tests
-                    sh 'export PATH=${COMPOSER_HOME}/vendor/bin:$PATH && ${COMPOSER_HOME}/vendor/bin/phpunit'
+                    sh 'phpunit'
                 }
             }
         }
