@@ -36,5 +36,14 @@ pipeline {
                 }
             }
         }
+
+        stage('Build and Test') {
+            steps {
+                script {
+                    echo 'Deploying containers...'
+                    sh 'docker-compose up -d --build'
+                }
+            }
+        }    
     }
 }
