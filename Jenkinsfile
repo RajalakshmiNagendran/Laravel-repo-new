@@ -1,3 +1,6 @@
+// Define Docker user and group IDs
+def DOCKER_USER_ID = "${ENV['UID']}"
+def DOCKER_GROUP_ID = "${ENV['GID']}"
 pipeline {
     agent any
     stages {
@@ -30,9 +33,9 @@ pipeline {
                 dir('/var/lib/jenkins/workspace/laravel') {
                     script {
                         echo 'Running Composer...'
-                        sh 'docker-compose run --rm --user $(id -u):$(id -g) composer install'
-                        sh 'docker-compose run --rm --user $(id -u):$(id -g) composer update --with-all-dependencies --no-scripts'
-                        sh 'docker-compose run --rm --user $(id -u):$(id -g) laravel.test artisan config:clear'
+                        sh 'docker-compose run --rm composer install'
+                        sh 'docker-compose run --rm composer update --with-all-dependencies --no-scripts'
+                        sh 'docker-compose run --rm laravel.test artisan config:clear'
                     }
                 }
             }
