@@ -40,7 +40,7 @@ pipeline {
                     sh 'echo $PATH'
                     
                     // Run PHPUnit tests
-                    sh "${COMPOSER_HOME}/vendor/bin/phpunit"
+                    sh 'export PATH=${COMPOSER_HOME}/vendor/bin:$PATH && ${COMPOSER_HOME}/vendor/bin/phpunit'
                 }
             }
         }
