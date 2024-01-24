@@ -27,7 +27,7 @@ pipeline {
 
         stage('Build and Test') {
             steps {
-                dir('/var/lib/jenkins/workspace/Laravel-new-ci-cd') {
+                dir('/var/lib/jenkins/workspace/laravel') {
                     script {
                         echo 'Running Composer...'
                         sh 'docker-compose run --rm composer install'
