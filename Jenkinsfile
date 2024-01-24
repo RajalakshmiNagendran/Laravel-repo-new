@@ -4,6 +4,7 @@ pipeline {
         stage("Verify Tooling") {
             steps {
                 script {
+                    cleanWs()
                     echo 'Docker Info:'
                     sh 'docker info'
 
@@ -42,7 +43,6 @@ pipeline {
                 script {
                     echo 'Deploying containers...'
                     sh 'docker-compose up -d --build'
-                    cleanWs()
                 }
             }
         }    
