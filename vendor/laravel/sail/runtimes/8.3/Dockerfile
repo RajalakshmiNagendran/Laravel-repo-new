@@ -59,7 +59,8 @@ COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY php.ini /etc/php/8.3/cli/conf.d/99-sail.ini
 RUN chmod +x /usr/local/bin/start-container
 RUN mkdir -p /var/www/html/storage && \
-    chown -R sail:sail /var/www/html/storage
+    chown -R sail:sail /var/www/html/storage && \
+    chmod -R 775 /var/www/html/storage
 
 EXPOSE 80
 
