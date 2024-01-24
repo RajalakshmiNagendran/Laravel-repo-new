@@ -27,9 +27,7 @@ pipeline {
                 dir('/var/lib/jenkins/workspace/Laravel-new-ci-cd') {
                     // Run Docker Compose command
                     script {
-                        sh 'docker-compose up -d'
-                        sh 'docker-compose run --rm composer install'
-                        // Add more Docker Compose commands as needed
+                        sh 'docker-compose run --rm composer'
                     }
                 }
             }
