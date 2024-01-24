@@ -32,7 +32,7 @@ pipeline {
                         echo 'Running Composer...'
                         sh 'docker-compose run --rm composer install'
                         sh 'docker-compose run --rm composer update --with-all-dependencies --no-scripts'
-                        sh 'docker-compose run --rm laravel.test artisan config:clear'
+                        sh 'php artisan config:clear'
                     }
                 }
             }
