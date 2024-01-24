@@ -25,7 +25,7 @@ pipeline {
                 steps {
                     script {
                         // Build Laravel Docker image
-                        sh 'docker-compose build'
+                        sh 'docker-compose up --build'
                     }
                 }
             }
