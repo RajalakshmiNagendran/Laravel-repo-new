@@ -4,6 +4,7 @@ pipeline {
         stage("Verify Tooling") {
             steps {
                 script {
+                    cleanWs()
                     echo 'Docker Info:'
                     sh 'docker info'
 
