@@ -21,24 +21,16 @@ pipeline {
                 }
             }
         }
-        stage("Run Composer Install") {
+        stage('Build and Test') {
             steps {
-                sh 'docker compose run --rm composer install'
-            }
-        }
-    	stage('Build') {
-            steps {
-                script {
-                    // Build Laravel Docker image
-                    sh 'docker-compose build'
-                }
-            }
-        }
-		stage('Test') {
-            steps {
-                script {
-                    // Run Laravel tests
-                    sh 'docker-compose run --rm laravel.test php artisan test'
+                // Set the project path using dir
+                dir('/var/lib/jenkins/workspace/Laravel-new-ci-cd') {
+                    // Run Docker Compose command
+                    script {
+                        sh 'docker-compose up -d'
+                        sh 'docker-compose run --rm composer install'
+                        // Add more Docker Compose commands as needed
+                    }
                 }
             }
         }
