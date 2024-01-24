@@ -30,7 +30,7 @@ pipeline {
                 dir('/var/lib/jenkins/workspace/laravel') {
                     script {
                         echo 'Running Composer...'
-                        sh 'docker compose run --rm composer install'
+                        sh 'composer install'
                         sh 'docker compose run --rm artisan test'
                     }
                 }
