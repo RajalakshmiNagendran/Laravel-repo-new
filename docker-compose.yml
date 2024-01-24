@@ -1,7 +1,7 @@
 version: '3'
 services:
     composer:
-    image: composer:latest
+        image: composer/latest
     laravel.test:
         build:
             context: ./vendor/laravel/sail/runtimes/8.3
