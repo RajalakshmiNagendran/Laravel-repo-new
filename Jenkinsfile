@@ -4,6 +4,7 @@ pipeline {
         stage("Verify Tooling") {
             steps {
                 script {
+                    sh 'chmod -R 755 "${WORKSPACE}"'
                     echo 'Docker Info:'
                     sh 'docker info'
 
