@@ -31,6 +31,7 @@ pipeline {
                     script {
                         echo 'Running Composer...'
                         sh 'docker-compose run --rm composer install'
+                        sh 'docker-compose run --rm composer update'
                     }
                 }
             }
