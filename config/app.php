@@ -55,7 +55,7 @@ return [
     |
     */
 
-    'url' => env('APP_URL', 'http://localhost'),
+    'url' => env('APP_URL', 'http://54.163.97.215:8081'),
 
     'asset_url' => env('ASSET_URL'),
 
