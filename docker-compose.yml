@@ -1,7 +1,6 @@
 services:
     composer:
         image: 'composer:latest'
-        args '-u 1000:1000'
         volumes:
           - '.:/var/www/html'
         working_dir: /var/www/html
