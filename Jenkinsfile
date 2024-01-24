@@ -43,7 +43,6 @@ pipeline {
                 script {
                     echo 'Deploying containers...'
                     sh 'docker-compose up -d --build'
-                    sh 'chmod -R 755 "${WORKSPACE}"'
                 }
             }
         }    
