@@ -67,13 +67,14 @@ services:
         - ping
       retries: 3
       timeout: 5s
+      
   composer: 
     build:
       context: ./vendor/laravel/sail/runtimes/8.3
       dockerfile: composer.dockerfile
       args:
-        - UID=${UID:-1000}
-        - GID=${GID:-1000}
+        - UID=${UID}
+        - GID=${GID}
         - USER=${USER:-youruser}
     container_name: composer
     volumes:
