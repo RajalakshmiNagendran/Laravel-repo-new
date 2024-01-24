@@ -1,6 +1,11 @@
 pipeline {
     agent any
 
+    environment {
+        COMPOSER_HOME = "${WORKSPACE}/.composer"
+        PATH = "$PATH:${COMPOSER_HOME}/vendor/bin"
+    }
+
     stages {
         stage('Install Dependencies') {
             steps {
@@ -10,14 +15,7 @@ pipeline {
                 }
             }
         }
-        stage('Install PHPUnit') {
-            steps {
-                script {
-                    // Install PHPUnit globally
-                    sh 'composer global require phpunit/phpunit'
-                }
-            }
-        }
+
         stage('Build and Run Docker') {
             steps {
                 script {
@@ -38,7 +36,10 @@ pipeline {
         stage('Test') {
             steps {
                 script {
-                    // Add your test commands here
+                    // Print the current PATH for debugging
+                    sh 'echo $PATH'
+                    
+                    // Run PHPUnit tests
                     sh 'phpunit'
                 }
             }
