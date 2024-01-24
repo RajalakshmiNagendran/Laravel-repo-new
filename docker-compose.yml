@@ -1,6 +1,6 @@
 services:
     composer:
-        image: composer/2.1
+        image: 'composer:2.1'
         volumes:
           - ./app:/var/www/html
         working_dir: /var/www/html
