@@ -61,6 +61,8 @@ RUN chmod +x /usr/local/bin/start-container
 RUN mkdir -p /var/www/html/storage && \
     chown -R sail:sail /var/www/html/storage && \
     chmod -R 775 /var/www/html/storage
+RUN ls -ld /var/www/html/storage
+RUN ls -lR /var/www/html/storage
 
 EXPOSE 80
 
