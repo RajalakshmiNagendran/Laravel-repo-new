@@ -21,21 +21,26 @@ pipeline {
                 }
             }
         }
-    		stage('Build') {
-                steps {
-                    script {
-                        // Build Laravel Docker image
-                        sh 'docker-compose up --build'
-                    }
+        stage("Run Composer Install") {
+            steps {
+                sh 'docker compose run --rm composer install'
+            }
+        }
+    	stage('Build') {
+            steps {
+                script {
+                    // Build Laravel Docker image
+                    sh 'docker-compose build'
                 }
             }
-    		stage('Test') {
-                steps {
-                    script {
-                        // Run Laravel tests
-                        sh 'docker-compose run --rm laravel.test php artisan test'
-                    }
+        }
+		stage('Test') {
+            steps {
+                script {
+                    // Run Laravel tests
+                    sh 'docker-compose run --rm laravel.test php artisan test'
                 }
             }
+        }
 	}
 }
