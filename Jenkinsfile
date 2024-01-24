@@ -30,8 +30,8 @@ pipeline {
                 dir('/var/lib/jenkins/workspace/laravel') {
                     script {
                         echo 'Running Composer...'
-                        sh 'docker-compose run --rm -e UID=$(id -u) -e GID=$(id -g) laravel.test chown -R sail:sail /var/www/html/storage'
-                        sh 'docker-compose run --rm -e UID=$(id -u) -e GID=$(id -g) laravel.test php artisan storage:link'
+                        sh 'docker compose run --rm composer install'
+                        sh 'docker compose run --rm artisan test'
                     }
                 }
             }
