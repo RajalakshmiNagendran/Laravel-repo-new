@@ -42,6 +42,7 @@ pipeline {
                 script {
                     echo 'Deploying containers...'
                     sh 'docker-compose up -d --build'
+                    cleanWs()
                 }
             }
         }    
