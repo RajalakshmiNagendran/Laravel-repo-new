@@ -40,7 +40,7 @@ pipeline {
                     sh 'echo $PATH'
                     
                     // Run PHPUnit tests
-                    sh 'phpunit'
+                    sh "${COMPOSER_HOME}/vendor/bin/phpunit"
                 }
             }
         }
