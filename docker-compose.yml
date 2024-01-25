@@ -67,26 +67,6 @@ services:
         - ping
       retries: 3
       timeout: 5s
-      
-  composer: 
-    build:
-      context: ./vendor/laravel/sail/runtimes/8.3
-      dockerfile: composer.dockerfile
-      args:
-        - UID=${UID}
-        - GID=${GID}
-        - USER=${USER:-youruser}
-    container_name: composer
-    volumes:
-      - ./:/var/www/html
-    working_dir: /var/www/html
-    depends_on:
-      - php
-    user: ${USER:-youruser}
-    entrypoint: ['composer', '--ignore-platform-reqs']
-    networks:
-      - laravel
-
 networks:
   sail:
     driver: bridge
