@@ -8,16 +8,9 @@ ARG SAIL_GID=${GID}
 ARG NODE_VERSION=20
 ARG POSTGRES_VERSION=15
 
-RUN groupadd --force -g $WWWGROUP sail \
-    && useradd -ms /bin/bash --no-user-group -g $WWWGROUP -u $SAIL_UID sail
-
 WORKDIR /var/www/html
 
 RUN ls -la /var/www/html
-
-RUN chown -R sail:sail /var/www/html
-
-USER sail
 
 ENV DEBIAN_FRONTEND noninteractive
 ENV TZ=UTC
@@ -62,6 +55,12 @@ RUN apt-get update \
 
 RUN setcap "cap_net_bind_service=+ep" /usr/bin/php8.3
 
+RUN chown -R sail:sail /var/www/html
+
+USER sail
+
+RUN groupadd --force -g $WWWGROUP sail \
+    && useradd -ms /bin/bash --no-user-group -g $WWWGROUP -u $SAIL_UID sail
 #RUN groupadd --force -g $WWWGROUP sail
 #RUN useradd -ms /bin/bash --no-user-group -g $WWWGROUP -u 1337 sail
 
