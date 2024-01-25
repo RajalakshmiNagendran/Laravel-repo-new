@@ -1,6 +1,18 @@
 pipeline {
     agent any
     stages {
+        stage("Clean Workspace") {
+          steps {
+            deleteDir()
+          }
+        }
+        stage("Checkout Code") {
+          steps {
+            script {
+              checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/RajalakshmiNagendran/Laravel-repo-new.git']])
+            }
+          }
+        }
         stage("Verify Tooling") {
             steps {
                 script {
