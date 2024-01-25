@@ -1,17 +1,29 @@
-FROM composer:2
+FROM php:7.4-fpm
 
-ARG UID
-ARG GID
-ARG USER
+# Install required extensions and dependencies
+RUN apt-get update && apt-get install -y \
+    libpng-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
+    libzip-dev \
+    unzip \
+    git \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -j$(nproc) gd \
+    && docker-php-ext-install pdo_mysql zip
 
-ENV UID=${UID}
-ENV GID=${GID}
-ENV USER=${USER}
+# Install Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# MacOS staff group's gid is 20, so is the dialout group in alpine linux. We're not using it, let's just remove it.
-RUN delgroup dialout
-
-RUN addgroup -g ${GID} --system ${USER}
-RUN adduser -G ${USER} --system -D -s /bin/sh -u ${UID} ${USER}
-
+# Set working directory
 WORKDIR /var/www/html
+
+# Copy application files
+COPY . /var/www/html
+
+# Install dependencies
+RUN composer install --no-interaction --no-dev --optimize-autoloader
+
+# Set permissions
+RUN chown -R www-data:www-data /var/www/html/storage
+RUN chown -R www-data:www-data /var/www/html/bootstrap/cache
