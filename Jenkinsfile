@@ -9,8 +9,7 @@ pipeline {
                     docker.image('composer:latest').pull()
 
                     // Run tests or other commands inside the Docker container
-                    docker.withRun('composer:latest', 'sh -c "composer install && php artisan test"') {
-                    }
+                    docker.withRun('composer:latest', 'sh -c "composer install && php artisan test"')
                 }
             }
         }
