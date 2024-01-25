@@ -3,31 +3,24 @@ FROM ubuntu:22.04
 LABEL maintainer="Taylor Otwell"
 
 ARG WWWGROUP=${GID}
-ARG SAIL_UID=1337
-ARG SAIL_GID=${GID}
 ARG NODE_VERSION=20
 ARG POSTGRES_VERSION=15
+ARG SAIL_UID=1337
 
 WORKDIR /var/www/html
 
-RUN ls -la /var/www/html
-
+# Set timezone
 ENV DEBIAN_FRONTEND noninteractive
 ENV TZ=UTC
-ENV SUPERVISOR_PHP_COMMAND="/usr/bin/php -d variables_order=EGPCS /var/www/html/artisan serve --host=0.0.0.0 --port=80"
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
-RUN echo $TZ > /etc/timezone && \
-    apt-get update && \
-    apt-get install -y tzdata && \
-    ln -fs /usr/share/zoneinfo/$TZ /etc/localtime && \
-    dpkg-reconfigure -f noninteractive tzdata && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
+# Install dependencies
 RUN apt-get update \
-    && mkdir -p /etc/apt/keyrings \
     && apt-get install -y gnupg gosu curl ca-certificates zip unzip git supervisor sqlite3 libcap2-bin libpng-dev python2 dnsutils librsvg2-bin fswatch \
-    && curl -sS 'https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x14aa40ec0831756756d7f66c4f4ea0aae5267a6c' | gpg --dearmor | tee /etc/apt/keyrings/ppa_ondrej_php.gpg > /dev/null \
+    && rm -rf /var/lib/apt/lists/*
+
+# Add Ondrej PHP repository
+RUN curl -sS 'https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x14aa40ec0831756756d7f66c4f4ea0aae5267a6c' | gpg --dearmor | tee /etc/apt/keyrings/ppa_ondrej_php.gpg > /dev/null \
     && echo "deb [signed-by=/etc/apt/keyrings/ppa_ondrej_php.gpg] https://ppa.launchpadcontent.net/ondrej/php/ubuntu jammy main" > /etc/apt/sources.list.d/ppa_ondrej_php.list \
     && apt-get update \
     && apt-get install -y php8.3-cli php8.3-dev \
@@ -39,8 +32,13 @@ RUN apt-get update \
        php8.3-ldap \
        php8.3-msgpack php8.3-igbinary php8.3-redis php8.3-swoole \
        php8.3-memcached php8.3-pcov php8.3-imagick php8.3-xdebug \
-    && curl -sLS https://getcomposer.org/installer | php -- --install-dir=/usr/bin/ --filename=composer \
-    && curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin/ --filename=composer
+
+# Install Node.js and Yarn
+RUN curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg \
     && echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_VERSION.x nodistro main" > /etc/apt/sources.list.d/nodesource.list \
     && apt-get update \
     && apt-get install -y nodejs \
@@ -49,32 +47,35 @@ RUN apt-get update \
     && npm install -g bun \
     && curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | gpg --dearmor | tee /etc/apt/keyrings/yarn.gpg >/dev/null \
     && echo "deb [signed-by=/etc/apt/keyrings/yarn.gpg] https://dl.yarnpkg.com/debian/ stable main" > /etc/apt/sources.list.d/yarn.list \
-    && curl -sS https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor | tee /etc/apt/keyrings/pgdg.gpg >/dev/null \
-    && echo "deb [signed-by=/etc/apt/keyrings/pgdg.gpg] http://apt.postgresql.org/pub/repos/apt jammy-pgdg main" > /etc/apt/sources.list.d/pgdg.list \
     && apt-get update \
     && apt-get install -y yarn \
-    && apt-get install -y mysql-client \
-    && apt-get install -y postgresql-client-$POSTGRES_VERSION \
-    && apt-get -y autoremove \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+    && rm -rf /var/lib/apt/lists/*
 
+# Install PostgreSQL client and MySQL client
+RUN curl -sS https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor | tee /etc/apt/keyrings/pgdg.gpg >/dev/null \
+    && echo "deb [signed-by=/etc/apt/keyrings/pgdg.gpg] http://apt.postgresql.org/pub/repos/apt jammy-pgdg main" > /etc/apt/sources.list.d/pgdg.list \
+    && apt-get update \
+    && apt-get install -y postgresql-client-$POSTGRES_VERSION mysql-client \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set capabilities for PHP
 RUN setcap "cap_net_bind_service=+ep" /usr/bin/php8.3
 
-RUN chown -R sail:sail /var/www/html
-
-USER sail
-
+# Create 'sail' group and user
 RUN groupadd --force -g $WWWGROUP sail \
     && useradd -ms /bin/bash --no-user-group -g $WWWGROUP -u $SAIL_UID sail
-#RUN groupadd --force -g $WWWGROUP sail
-#RUN useradd -ms /bin/bash --no-user-group -g $WWWGROUP -u 1337 sail
 
+# Copy necessary files
 COPY start-container /usr/local/bin/start-container
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY php.ini /etc/php/8.3/cli/conf.d/99-sail.ini
+
+# Change permissions
+RUN chown -R sail:sail /var/www/html
 RUN chmod +x /usr/local/bin/start-container
 
 EXPOSE 80
+
+USER sail
 
 ENTRYPOINT ["start-container"]
