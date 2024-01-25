@@ -2,59 +2,82 @@ pipeline {
     agent any
 
     environment {
-        COMPOSER_HOME = "${WORKSPACE}/.composer"
+        GIT_COMMIT_SHORT = "${sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()}"
     }
 
     stages {
-        stage('Install Dependencies') {
+        stage('Checkout') {
             steps {
-                script {
-                    // Run Composer install
-                    sh "composer install"
+                git branch: 'main', url: 'your-repository-url'
+            }
+        }
+
+        stage('Create Dockerfile') {
+            steps {
+                writeFile file: 'Dockerfile', text: '''
+FROM php:7.4-fpm
+
+# Install required extensions and dependencies
+RUN apt-get update && apt-get install -y \
+    libpng-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
+    libzip-dev \
+    unzip \
+    git \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -j$(nproc) gd \
+    && docker-php-ext-install pdo_mysql zip
+
+# Install Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# Set working directory
+WORKDIR /var/www/html
+
+# Copy application files
+COPY . /var/www/html
+
+# Install dependencies
+RUN composer install --no-interaction --no-dev --optimize-autoloader
+
+# Set permissions
+RUN chown -R www-data:www-data /var/www/html/storage
+RUN chown -R www-data:www-data /var/www/html/bootstrap/cache
+'''
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh "docker build -t your-dockerhub-username/your-image-name:${env.GIT_COMMIT_SHORT} ."
+            }
+        }
+
+        stage('Push Docker Image') {
+            steps {
+                withCredentials([string(credentialsId: 'your-dockerhub-credentials-id', variable: 'DOCKERHUB_TOKEN')]) {
+                    sh "echo '${DOCKERHUB_TOKEN}' | docker login -u your-dockerhub-username --password-stdin"
+                    sh "docker push your-dockerhub-username/your-image-name:${env.GIT_COMMIT_SHORT}"
                 }
             }
         }
 
-        stage('Build and Run Docker') {
+        stage('Deploy Laravel Application') {
             steps {
-                script {
-                    // Check if docker-compose.yml has changed
-                    def dockerComposeChanged = fileExists('docker-compose.yml.changed')
-
-                    // If changes detected, rebuild and run Docker containers
-                    if (dockerComposeChanged) {
-                        sh 'docker-compose build'
-                        sh 'docker-compose up -d'
-                    } else {
-                        echo 'No changes in docker-compose.yml. Skipping Docker build and run.'
-                    }
+                // Replace 'ssh-credentials-id' with your SSH credentials ID in Jenkins
+                sshagent(['ssh-credentials-id']) {
+                    // Replace 'your-deployment-server' with your server's IP or domain
+                    sh "ssh your-deployment-server 'docker pull your-dockerhub-username/your-image-name:${env.GIT_COMMIT_SHORT}'"
+                    sh "ssh your-deployment-server 'docker-compose down && docker-compose up -d --force-recreate'"
                 }
             }
         }
+    }
 
-        stage('Test') {
-            steps {
-                script {
-                    // Set up environment variables for PHPUnit
-                    def composerBin = "${COMPOSER_HOME}/vendor/bin"
-                    env.PATH = "${composerBin}:${env.PATH}"
-
-                    // Run PHPUnit tests
-                    sh 'phpunit'
-                }
-            }
-        }
-
-        stage('Deploy') {
-            steps {
-                script {
-                    // Add your deployment steps here
-                    echo 'Deploying...'
-                    // Example: Run migrations, clear cache, etc.
-                    sh 'php artisan migrate'
-                    sh 'php artisan cache:clear'
-                }
-            }
+    post {
+        failure {
+            // Configure notifications if required, e.g., email, Slack, etc.
         }
     }
 }
