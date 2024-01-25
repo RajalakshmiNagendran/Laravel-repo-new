@@ -3,8 +3,13 @@ FROM ubuntu:22.04
 LABEL maintainer="Taylor Otwell"
 
 ARG WWWGROUP=${GID}
+ARG SAIL_UID=1337
+ARG SAIL_GID=${GID}
 ARG NODE_VERSION=20
 ARG POSTGRES_VERSION=15
+
+RUN groupadd --force -g $WWWGROUP sail \
+    && useradd -ms /bin/bash --no-user-group -g $WWWGROUP -u $SAIL_UID sail
 
 WORKDIR /var/www/html
 
