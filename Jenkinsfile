@@ -1,17 +1,46 @@
 pipeline {
     agent any
-
     stages {
-        stage('Build and Test') {
+        stage("Verify Tooling") {
             steps {
                 script {
-                    // Pull the official Composer image from Docker Hub
-                    docker.image('composer:latest').pull()
+                    echo 'Docker Info:'
+                    sh 'docker info'
 
-                    // Run tests or other commands inside the Docker container
-                    docker.withRun('composer:latest', 'sh -c "composer install && php artisan test"')
+                    echo 'Docker Version:'
+                    sh 'docker version'
+
+                    echo 'Docker Compose Version:'
+                    sh 'docker-compose version'
                 }
             }
         }
+
+        stage("Clear All Running Docker Containers") {
+            steps {
+                script {
+                    echo 'Clearing running containers...'
+                    sh 'docker rm -f $(docker ps -a -q) || true'
+                }
+            }
+        }
+
+        stage('Build and Test') {
+            steps {
+                    script {
+                        echo 'Running Composer...'
+                        sh 'docker-compose run --rm composer install'
+                        sh 'docker-compose run --rm composer update --with-all-dependencies --no-scripts'
+                    }
+                }
+            }
+        stage('Deploy stage') {
+            steps {
+                script {
+                    echo 'Deploying containers...'
+                    sh 'docker-compose up -d --build'
+                }
+            }
+        }    
     }
 }
