@@ -12,7 +12,7 @@ pipeline {
         }
         stage("Unit test") {
             steps {
-                sh 'php artisan test'
+                sh 'docker compose run --rm artisan test'
             }
         }
   }
